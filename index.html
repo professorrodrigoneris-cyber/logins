@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plurall - Acesso Estudante</title>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Styles -->
+    <link rel="stylesheet" href="style.css">
+    <!-- PapaParse for CSV -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+</head>
+
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header>
+            <div class="header-content">
+                <h1>Gerenciador de Acessos</h1>
+                <p>Plurall - Escola Alegria</p>
+                <button class="config-btn" id="open-config" title="Configurações">
+                    <i class="fa-solid fa-gear"></i>
+                </button>
+            </div>
+        </header>
+
+        <div class="content">
+            <!-- Main Flow: Select Class & Student -->
+            <div class="form-group main-flow">
+                <label for="turma-select">Selecione a Turma</label>
+                <div class="select-wrapper">
+                    <select id="turma-select">
+                        <option value="" disabled selected>Escolha uma turma...</option>
+                        <!-- Populated by JS -->
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group main-flow student-flow hidden" id="student-container">
+                <label>Selecione o Aluno</label>
+                <div class="student-list-container" id="student-list">
+                    <!-- Populated by JS -->
+                </div>
+            </div>
+
+            <!-- Student Detail / Message Preview -->
+            <div id="message-area" class="message-preview hidden">
+                <!-- Message content injected by JS -->
+            </div>
+
+            <!-- Action Buttons for Selected Student -->
+            <div id="action-buttons-area" class="action-buttons hidden">
+                <button class="btn btn-secondary" id="btn-msg-rodrigo">
+                    <i class="fa-brands fa-whatsapp"></i> Rodrigo
+                </button>
+                <button class="btn btn-secondary" id="btn-msg-socorro">
+                    <i class="fa-brands fa-whatsapp"></i> Socorro
+                </button>
+                <button class="btn btn-primary full-width" id="btn-msg-aluno">
+                    <i class="fa-regular fa-paper-plane"></i> Enviar para Aluno
+                </button>
+            </div>
+
+            <!-- Feature: Aluno Não Cadastrado Toggle -->
+            <div class="feature-section">
+                <button class="btn btn-secondary full-width" id="btn-not-registered-toggle">
+                    <i class="fa-solid fa-user-plus"></i> Aluno não Cadastrado?
+                </button>
+            </div>
+
+            <!-- Not Registered Flow (Initially Hidden) -->
+            <div id="not-registered-flow" class="not-registered-flow hidden">
+                <div class="form-group">
+                    <label style="margin-top: 10px;">Turma do Aluno</label>
+                    <div class="select-wrapper">
+                        <select id="nr-turma-select">
+                            <option value="">Selecione a turma...</option>
+                            <!-- Populated by JS -->
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Nome do Aluno</label>
+                    <input type="text" id="nr-student-name" placeholder="Digite o nome completo">
+                </div>
+
+                <div class="checkbox-group" style="padding: 10px 0;">
+                    <label style="width: 100%;">Quer que envio para quem?</label>
+                    <label class="checkbox-wrapper">
+                        <input type="checkbox" id="nr-check-me" checked> Para mim (Rodrigo)
+                    </label>
+                    <label class="checkbox-wrapper">
+                        <input type="checkbox" id="nr-check-student"> Para Aluno
+                    </label>
+                </div>
+
+                <div class="form-group hidden" id="nr-student-phone-group">
+                    <label>Número do Aluno</label>
+                    <input type="text" id="nr-student-phone" placeholder="5511999999999">
+                </div>
+
+                <button class="btn btn-success full-width" id="btn-request-inclusion" style="margin-top: 15px;">
+                    Solicitar Inclusão
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Modal: Input Student Number -->
+    <div class="modal-overlay" id="modal-student-number">
+        <div class="modal">
+            <div class="modal-header">
+                <h2>Enviar para Aluno</h2>
+                <button class="close-btn" data-target="modal-student-number">&times;</button>
+            </div>
+            <div class="form-group">
+                <label>Número do WhatsApp</label>
+                <input type="text" id="modal-input-phone" placeholder="66999999999">
+                <p style="font-size: 0.75rem; color: #888; margin-top: 5px;">Inclua apenas o DDD e o número.</p>
+            </div>
+            <button class="btn btn-primary full-width" id="modal-confirm-send" style="margin-top: 20px;">
+                Enviar Mensagem
+            </button>
+        </div>
+    </div>
+
+    <!-- Modal: Config Login -->
+    <div class="modal-overlay" id="modal-config-login">
+        <div class="modal">
+            <div class="modal-header">
+                <h2>Acesso Restrito</h2>
+                <button class="close-btn" data-target="modal-config-login">&times;</button>
+            </div>
+            <div class="form-group">
+                <label>Senha de Administrador</label>
+                <input type="password" id="config-password-input" placeholder="Digite a senha">
+            </div>
+            <button class="btn btn-primary full-width" id="btn-config-login" style="margin-top: 20px;">
+                Acessar
+            </button>
+        </div>
+    </div>
+
+    <!-- Modal: Config Dashboard -->
+    <div class="modal-overlay" id="modal-config-dashboard">
+        <div class="modal" style="max-width: 500px;">
+            <div class="modal-header">
+                <h2>Configurações</h2>
+                <button class="close-btn" data-target="modal-config-dashboard">&times;</button>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 15px;">
+                <label>Número Rodrigo</label>
+                <input type="text" id="conf-rodrigo" value="5566992331535">
+            </div>
+            <div class="form-group" style="margin-bottom: 20px;">
+                <label>Número Socorro</label>
+                <input type="text" id="conf-socorro" value="5566996622907">
+            </div>
+
+            <div style="border-top: 1px solid #ddd; padding-top: 20px;">
+                <h3>Gerenciar Alunos</h3>
+                <p style="font-size: 0.8rem; color: #666; margin-bottom: 10px;">Adicione novos alunos manualmente ou
+                    importe via CSV.</p>
+
+                <div class="action-buttons">
+                    <button class="btn btn-secondary full-width"
+                        onclick="document.getElementById('csv-file-input').click()">
+                        <i class="fa-solid fa-file-csv"></i> Importar CSV
+                    </button>
+                    <input type="file" id="csv-file-input" accept=".csv" style="display: none;">
+                </div>
+                <p style="font-size: 0.75rem; color: #888; margin-top: 5px; text-align: center;" id="csv-status"></p>
+            </div>
+
+            <div style="border-top: 1px solid #ddd; padding-top: 20px; margin-top: 20px;">
+                <h3>Adicionar Manualmente</h3>
+                <div class="form-group" style="margin-top: 10px;">
+                    <select id="conf-add-turma" class="full-width" style="margin-bottom: 5px;">
+                        <option value="">Selecione Turma</option>
+                        <!-- Populated JS -->
+                    </select>
+                    <input type="text" id="conf-add-name" placeholder="Nome" style="margin-bottom: 5px;">
+                    <input type="text" id="conf-add-login" placeholder="Login" style="margin-bottom: 5px;">
+                    <input type="password" id="conf-add-pass" placeholder="Senha">
+                    <button class="btn btn-success full-width" id="btn-add-student-manual"
+                        style="margin-top: 10px;">Salvar Aluno</button>
+                </div>
+            </div>
+
+            <div style="border-top: 1px solid #ddd; padding-top: 20px; margin-top: 20px;">
+                <h3>Remover Aluno</h3>
+                <div class="form-group" style="margin-top: 10px;">
+                    <select id="conf-remove-turma" class="full-width" style="margin-bottom: 5px;">
+                        <option value="">Selecione Turma</option>
+                    </select>
+                    <select id="conf-remove-student" class="full-width" style="margin-bottom: 5px;" disabled>
+                        <option value="">Selecione Aluno</option>
+                    </select>
+                    <button class="btn btn-danger full-width" id="btn-remove-student" style="margin-top: 10px;">Remover
+                        Selecionado</button>
+                </div>
+            </div>
+
+            <button class="btn btn-secondary full-width" id="btn-reset-db"
+                style="margin-top: 20px; font-size: 0.8rem; background: #f8f9fa; color: #666; border: 1px solid #ddd;">
+                Restaurar Banco de Dados Original (CSV)
+            </button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
