@@ -93,7 +93,7 @@
                 <div class="checkbox-group" style="padding: 10px 0;">
                     <label style="width: 100%;">Quer que envio para quem?</label>
                     <label class="checkbox-wrapper">
-                        <input type="checkbox" id="nr-check-me" checked> Para mim (Socorro)
+                        <input type="checkbox" id="nr-check-me" checked> Para mim (Rodrigo)
                     </label>
                     <label class="checkbox-wrapper">
                         <input type="checkbox" id="nr-check-student"> Para Aluno
@@ -166,53 +166,15 @@
             </div>
 
             <div style="border-top: 1px solid #ddd; padding-top: 20px;">
-                <h3>Gerenciar Alunos</h3>
-                <p style="font-size: 0.8rem; color: #666; margin-bottom: 10px;">Adicione novos alunos manualmente ou
-                    importe via CSV.</p>
-
-                <div class="action-buttons">
-                    <button class="btn btn-secondary full-width"
-                        onclick="document.getElementById('csv-file-input').click()">
-                        <i class="fa-solid fa-file-csv"></i> Importar CSV
-                    </button>
-                    <input type="file" id="csv-file-input" accept=".csv" style="display: none;">
-                </div>
-                <p style="font-size: 0.75rem; color: #888; margin-top: 5px; text-align: center;" id="csv-status"></p>
+                <h3>Sincronização</h3>
+                <p style="font-size: 0.8rem; color: #666; margin-bottom: 10px;">
+                    Se você atualizou o arquivo <b>Dados de acesso.csv</b> no GitHub, clique abaixo para baixar a nova
+                    versão e atualizar o site.
+                </p>
+                <button class="btn btn-primary full-width" id="btn-force-update">
+                    <i class="fa-solid fa-sync"></i> Atualizar Banco de Dados (CSV)
+                </button>
             </div>
-
-            <div style="border-top: 1px solid #ddd; padding-top: 20px; margin-top: 20px;">
-                <h3>Adicionar Manualmente</h3>
-                <div class="form-group" style="margin-top: 10px;">
-                    <select id="conf-add-turma" class="full-width" style="margin-bottom: 5px;">
-                        <option value="">Selecione Turma</option>
-                        <!-- Populated JS -->
-                    </select>
-                    <input type="text" id="conf-add-name" placeholder="Nome" style="margin-bottom: 5px;">
-                    <input type="text" id="conf-add-login" placeholder="Login" style="margin-bottom: 5px;">
-                    <input type="password" id="conf-add-pass" placeholder="Senha">
-                    <button class="btn btn-success full-width" id="btn-add-student-manual"
-                        style="margin-top: 10px;">Salvar Aluno</button>
-                </div>
-            </div>
-
-            <div style="border-top: 1px solid #ddd; padding-top: 20px; margin-top: 20px;">
-                <h3>Remover Aluno</h3>
-                <div class="form-group" style="margin-top: 10px;">
-                    <select id="conf-remove-turma" class="full-width" style="margin-bottom: 5px;">
-                        <option value="">Selecione Turma</option>
-                    </select>
-                    <select id="conf-remove-student" class="full-width" style="margin-bottom: 5px;" disabled>
-                        <option value="">Selecione Aluno</option>
-                    </select>
-                    <button class="btn btn-danger full-width" id="btn-remove-student" style="margin-top: 10px;">Remover
-                        Selecionado</button>
-                </div>
-            </div>
-
-            <button class="btn btn-secondary full-width" id="btn-reset-db"
-                style="margin-top: 20px; font-size: 0.8rem; background: #f8f9fa; color: #666; border: 1px solid #ddd;">
-                Restaurar Banco de Dados Original (CSV)
-            </button>
         </div>
     </div>
 

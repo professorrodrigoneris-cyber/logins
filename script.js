@@ -342,14 +342,21 @@ function setupEventListeners() {
         }
     });
 
-    // Import CSV Logic
-    document.getElementById('csv-file-input').addEventListener('change', (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
+    // --- Force Update Flow ---
 
-        Papa.parse(file, {
+    document.getElementById('btn-force-update').addEventListener('click', () => {
+        const btn = document.getElementById('btn-force-update');
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Atualizando...';
+        btn.disabled = true;
+
+        // Force fetch with timestamp to bypass cache
+        const timestamp = new Date().getTime();
+        Papa.parse(`Dados%20de%20acesso.csv?v=${timestamp}`, {
+            download: true,
             header: false,
             complete: function (results) {
+                // Parse CSV
                 const newStudents = results.data
                     .filter(row => row.length >= 4 && row[0])
                     .map(row => ({
@@ -359,79 +366,29 @@ function setupEventListeners() {
                         senha: row[3].trim()
                     }));
 
-                appData.students = newStudents;
-                localStorage.setItem(DB_KEY, JSON.stringify(appData.students));
-                document.getElementById('csv-status').textContent = `Sucesso! ${newStudents.length} alunos importados.`;
-                document.getElementById('csv-status').style.color = 'green';
-                initApp(); // refresh UI
+                if (newStudents.length > 0) {
+                    appData.students = newStudents;
+                    localStorage.setItem(DB_KEY, JSON.stringify(appData.students));
+
+                    // Reset UI
+                    renderStudentList(document.getElementById('turma-select').value);
+                    initApp(); // re-populate dropdowns if classes changed
+
+                    alert(`Sucesso! Banco de dados atualizado com ${newStudents.length} alunos.`);
+                } else {
+                    alert("O arquivo CSV parece estar vazio ou inválido.");
+                }
+
+                btn.innerHTML = originalText;
+                btn.disabled = false;
             },
-            error: function () {
-                document.getElementById('csv-status').textContent = 'Erro ao ler arquivo.';
-                document.getElementById('csv-status').style.color = 'red';
+            error: function (err) {
+                console.error("Error updating CSV:", err);
+                alert("Erro ao baixar o arquivo CSV. Verifique sua conexão.");
+                btn.innerHTML = originalText;
+                btn.disabled = false;
             }
         });
-    });
-
-    // Add Student Manual
-    document.getElementById('btn-add-student-manual').addEventListener('click', () => {
-        const turma = document.getElementById('conf-add-turma').value;
-        const nome = document.getElementById('conf-add-name').value;
-        const login = document.getElementById('conf-add-login').value;
-        const senha = document.getElementById('conf-add-pass').value;
-
-        if (!turma || !nome || !login || !senha) {
-            alert("Preencha todos os campos");
-            return;
-        }
-
-        appData.students.push({ turma, nome, login, senha });
-        localStorage.setItem(DB_KEY, JSON.stringify(appData.students));
-
-        // Clear fields
-        document.getElementById('conf-add-name').value = '';
-        document.getElementById('conf-add-login').value = '';
-        document.getElementById('conf-add-pass').value = '';
-
-        alert("Aluno adicionado!");
-        initApp(); // Refresh lists if open
-    });
-
-    // Remove Student Logic
-    document.getElementById('conf-remove-turma').addEventListener('change', (e) => {
-        populateRemoveStudentDropdown(e.target.value);
-    });
-
-    document.getElementById('btn-remove-student').addEventListener('click', () => {
-        const select = document.getElementById('conf-remove-student');
-        if (!select.value) {
-            alert("Selecione um aluno para remover.");
-            return;
-        }
-
-        const studentToRemove = JSON.parse(select.value);
-        const confirmDelete = confirm(`Remover ${studentToRemove.nome}?`);
-
-        if (confirmDelete) {
-            // Remove from array
-            appData.students = appData.students.filter(s =>
-                s.turma !== studentToRemove.turma || s.nome !== studentToRemove.nome
-            );
-
-            localStorage.setItem(DB_KEY, JSON.stringify(appData.students));
-
-            // Refresh
-            populateRemoveStudentDropdown(studentToRemove.turma);
-            initApp();
-            alert("Aluno removido com sucesso.");
-        }
-    });
-
-    // Reset DB
-    document.getElementById('btn-reset-db').addEventListener('click', () => {
-        if (confirm("Tem certeza? Isso apagará todas as edições locais e restaurará o arquivo CSV original.")) {
-            localStorage.removeItem(DB_KEY);
-            location.reload();
-        }
     });
 
     // Save Configs on blur (Auto-save)
