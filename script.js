@@ -240,6 +240,56 @@ function setupEventListeners() {
         sendTo(appData.config.socorro, generateStudentMessage(appData.currentStudent));
     });
 
+    document.getElementById('btn-copy-msg').addEventListener('click', () => {
+        if (!appData.currentStudent) return;
+        const msg = generateStudentMessage(appData.currentStudent);
+
+        // Try the modern Clipboard API first (requires secure origin like HTTPS or localhost)
+        if (navigator.clipboard && window.isSecureContext) {
+            navigator.clipboard.writeText(msg).then(() => {
+                alert('Mensagem copiada com sucesso!');
+            }).catch(err => {
+                console.error('Erro ao copiar mensagem via navigator:', err);
+                alert('Erro ao copiar a mensagem.');
+            });
+        } else {
+            // Fallback for file:// protocol or older browsers
+            const textArea = document.createElement("textarea");
+            textArea.value = msg;
+
+            // Prevent zooming/scrolling on mobile and ensure it's out of focus view
+            textArea.style.position = "fixed";
+            textArea.style.top = "0";
+            textArea.style.left = "0";
+            // Ensure small size
+            textArea.style.width = "2em";
+            textArea.style.height = "2em";
+            textArea.style.padding = 0;
+            textArea.style.border = 'none';
+            textArea.style.outline = 'none';
+            textArea.style.boxShadow = 'none';
+            textArea.style.background = 'transparent';
+
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+
+            try {
+                const successful = document.execCommand('copy');
+                if (successful) {
+                    alert('Mensagem copiada com sucesso!');
+                } else {
+                    alert('Erro ao copiar a mensagem.');
+                }
+            } catch (err) {
+                console.error('Erro no fallback de cópia execCommand:', err);
+                alert('Erro ao copiar a mensagem. Tente selecionar o texto manualmente.');
+            }
+
+            document.body.removeChild(textArea);
+        }
+    });
+
     // Send to Student Modal
     const studentModal = document.getElementById('modal-student-number');
 
